@@ -1,0 +1,65 @@
+#!/bin/bash
+Header()
+{
+    #Display Header 
+    echo "-------------------------------------------------"
+    echo "Compile standalone tikz figures and display image"
+    echo "-------------------------------------------------"
+}
+Usage()
+{
+    #Display usage
+    Header
+    echo "Usage : $0 <texfile> [-h|-l|-n]"
+    echo
+    echo "Options :"
+    echo "      -h          Print this usage mesage"   
+    echo "      -l          Landscape mode output"
+    echo "      -n          No display pdf file"    
+    echo
+}
+[ $# -eq 0 ] && Usage
+Header
+[ ! -d fig ] && mkdir fig
+# default value 
+landscape=0 # portrait by default
+display=1   # display by default
+while getopts ":hnl" option; do
+   case $option in
+      h) # display Help
+         Usage
+         exit;;
+      n) # no display
+         display=0;;
+      l) # landscape mode
+         landscape=1;;
+      \?) # Invalid option
+         echo "Erreur : option non valide"
+         exit;; 
+   esac
+done
+shift $(( OPTIND - 1 ))
+name=$1
+echo "Input file :" $name
+for file in $name 
+do
+    basenameextension=${file##*/}
+    basename=${basenameextension%.*}
+    texname=${basename}.tex
+    cat << EOF > tikz/${texname}
+\documentclass[tikz]{standalone}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{tikzfmv}
+\begin{document}
+EOF
+cat $file                 >> tikz/${texname}
+echo "\end{document}"     >> tikz/${texname}
+pdflatex -output-directory fig tikz/${texname}
+rm tikz/${texname} fig/${basename}.aux fig/${basename}.log
+done
+if [ "$display" -eq 1 ]
+then
+    mupdf fig/${basename}.pdf
+fi
+convert -density 300 -trim fig/${basename}.pdf -quality 100 fig/${basename}.png

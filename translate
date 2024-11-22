@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ $# -eq 0 ]
+then
+    echo "Usage: $0 <string or file> [TARGET]"
+    echo "TARGET : (default) en, fr, pt, es, de"
+    echo "  for more target language : ~/bin/translate.py"
+    exit 1
+fi
+
+string=$1
+tg=$2
+[ -f $1 ] && string=$(cat $1)
+if [ -z $tg ] 
+then
+    ~/bin/translate.py "$string" 
+else
+    ~/bin/translate.py "$string" -t $tg
+fi

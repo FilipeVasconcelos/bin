@@ -1,0 +1,7 @@
+#!/bin/bash
+for file in $@
+do
+    
+    #base=$(basename $file .png)
+    #convert  ${file} eps3:${base}.eps
+done
